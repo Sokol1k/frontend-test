@@ -1,44 +1,10 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
+    <q-header elevated class="q-pa-md">
+      <span class="text-h5">
+        Frontend test
+      </span>
     </q-header>
-
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
-
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -46,71 +12,70 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import EssentialLink from 'components/EssentialLink.vue';
+import {defineComponent, onMounted} from 'vue';
 
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
-];
+import {FieldTypes} from 'src/constants/fields'
+import {Brand, Color, Engine, InteriorMaterial, WheelRim, WheelType} from 'src/constants/specifications'
+
+import OptionRepository from 'src/repositories/OptionRepository'
+import SpecificationRepository from 'src/repositories/SpecificationRepository'
+import SpecificationOptionRepository from 'src/repositories/SpecificationOptionRepository'
 
 export default defineComponent({
   name: 'MainLayout',
+  setup() {
+    onMounted(async () => {
+      // initial state
+      const specs = [
+        await SpecificationRepository.create({
+          name: 'Sport',
+          brand: Brand.BMW,
+          engine: Engine.V8_40L,
+          interiorMaterial: InteriorMaterial.LEATHER,
+          color: Color.BLACK,
+          wheelRim: WheelRim.INCH_22,
+          wheelType: WheelType.BBS,
+        }),
+        await SpecificationRepository.create({
+          name: 'Prestige',
+          brand: Brand.MERCEDES,
+          engine: Engine.L6_20L,
+          interiorMaterial: InteriorMaterial.ECO_LEATHER,
+          color: Color.WHITE,
+          wheelRim: WheelRim.INCH_17,
+          wheelType: WheelType.WOLF,
+        }),
+        await SpecificationRepository.create({
+          name: 'Standard',
+          brand: Brand.AUDI,
+          engine: Engine.V6_35L,
+          interiorMaterial: InteriorMaterial.TEXTILE,
+          color: Color.GREY,
+          wheelRim: WheelRim.INCH_20,
+          wheelType: WheelType.TG_RACING,
+        }),
+      ]
 
-  components: {
-    EssentialLink
-  },
+      const opts = [
+        await OptionRepository.create({
+          name: 'Text',
+          type: FieldTypes.text,
+        }),
+        await OptionRepository.create({
+          name: 'Text',
+          type: FieldTypes.checkbox,
+        })
+      ]
 
-  setup () {
-    const leftDrawerOpen = ref(false)
-
-    return {
-      essentialLinks: linksList,
-      leftDrawerOpen,
-      toggleLeftDrawer () {
-        leftDrawerOpen.value = !leftDrawerOpen.value
+      for (const spec of specs) {
+        for (const opt of opts) {
+          await SpecificationOptionRepository.create({
+            specificationId: spec.id,
+            optionId: opt.id
+          })
+        }
       }
-    }
+    })
   }
 });
 </script>
